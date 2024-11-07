@@ -1,0 +1,11 @@
+# Ignore all class files
+*.class
+
+# Ignore build output directories
+/out/
+
+# Ignore IntelliJ IDEA project files
+.idea/
+
+# Ignore any generated files
+tasks.json
