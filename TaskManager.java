@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 public class TaskManager {
     private static final String FILE_NAME = "tasks.json";
     private static final Logger logger = Logger.getLogger(TaskManager.class.getName());
-    private List<Map<String, Object>> tasks;
+    private final List<Map<String, Object>> tasks;
 
     public TaskManager() {
         tasks = new ArrayList<>();
@@ -62,7 +62,7 @@ public class TaskManager {
                     currentTask = new HashMap<>();
                 } else if (line.startsWith("}")) {
                     tasks.add(currentTask);
-                } else if (currentTask != null) {
+                } else if (currentTask != null && !line.startsWith("]")) {
                     String[] parts = line.replace("\"", "").split(":");
                     String key = parts[0].trim();
                     String value = parts[1].trim().replace(",", "");
@@ -76,5 +76,16 @@ public class TaskManager {
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error while loading tasks.", e);
         }
+    }
+
+    public int generateTaskId() {
+        if (tasks.isEmpty()) {
+            return 1;
+        }
+        return (int) tasks.getLast().get("id") + 1;
+    }
+
+    public List<Map<String, Object>> getTasks() {
+        return new ArrayList<>(tasks);
     }
 }
