@@ -1,10 +1,12 @@
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class TaskManager {
     private static final String FILE_NAME = "tasks.json";
@@ -87,5 +89,24 @@ public class TaskManager {
 
     public List<Map<String, Object>> getTasks() {
         return new ArrayList<>(tasks);
+    }
+
+    public boolean updateTask(int id, String newDescription) {
+        Map<String, Object> taskToFind = findTaskById(id);
+        if (taskToFind == null) {
+            return Boolean.FALSE;
+        }
+        taskToFind.put("description", newDescription);
+        taskToFind.put("updatedAt", LocalDateTime.now());
+        saveTasks();
+        return Boolean.TRUE;
+    }
+
+    private Map<String, Object> findTaskById(int id) {
+        return tasks
+                .stream()
+                .filter(task -> id == (int) task.get("id"))
+                .findFirst()
+                .orElse(null);
     }
 }

@@ -1,14 +1,19 @@
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import config.LoggerConfigurator;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.*;
 
 public class TaskCLI {
     private static final Logger logger = Logger.getLogger(TaskCLI.class.getName());
 
     public static void main(String[] args) {
+        LoggerConfigurator.configure();
         TaskManager taskManager = new TaskManager();
 
         if (args.length == 0) {
-            System.out.println("Usage: java TaskCLI <command> [options]");
+            logger.log(Level.INFO, "Usage: java TaskCLI <command> [options]");
             return;
         }
 
@@ -19,6 +24,7 @@ public class TaskCLI {
                 handleAdd(taskManager, args);
                 break;
             case "update":
+                handleUpdate(taskManager, args);
                 break;
             case "delete":
                 break;
@@ -30,20 +36,19 @@ public class TaskCLI {
                 handleList(taskManager, args);
                 break;
             default:
-                System.out.println("Unknown command: " + command);
-                System.out.println("Available commands: add, list");
+                logger.log(Level.INFO, "Unknown command: {0}\nAvailable commands: add, list, update", command);
                 break;
         }
     }
 
     private static void handleAdd(TaskManager taskManager, String[] args) {
         if (args.length < 2) {
-            System.out.println("Usage: java TaskCLI add <description>");
+            logger.log(Level.INFO, "Usage: java TaskCLI add <description>");
             return;
         }
 
         // Combine all arguments after "add" into a single description
-        String description = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
+        String description = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
 
         Task task = new Task(taskManager.generateTaskId(), description);
         taskManager.addTask(task);
@@ -52,21 +57,57 @@ public class TaskCLI {
 
     private static void handleList(TaskManager taskManager, String[] args) {
         if (args.length > 2) {
-            System.out.println("Usage: \njava TaskCLI list\njava TaskCLI list [done|todo|in-progress]");
+            logger.log(Level.INFO, "Usage: \njava TaskCLI list\njava TaskCLI list [done|todo|in-progress]");
             return;
         }
 
         if (args.length == 2) {
             String status = args[1];
             if (!status.equals("done") && !status.equals("todo") && !status.equals("in-progress")) {
-                System.out.println("Invalid status. Usage: java TaskCLI list [done|todo|in-progress]");
+                logger.log(Level.INFO, "Invalid task status: {0}\nUsage: java TaskCLI list [done|todo|in-progress]", status);
                 return;
             }
-            taskManager.getTasks().stream()
+            List<Map<String, Object>> tasksByStatus = taskManager.getTasks()
+                    .stream()
                     .filter(task -> status.equals(task.get("status")))
-                    .forEach(System.out::println);
+                    .toList();
+            if (tasksByStatus.isEmpty()) {
+                logger.log(Level.INFO, "No tasks with {0} status.", status);
+            } else {
+                logger.log(Level.INFO, "List of tasks with {0} status:", status);
+                tasksByStatus.forEach(System.out::println);
+            }
         } else {
-            taskManager.getTasks().forEach(System.out::println);
+            if (taskManager.getTasks().isEmpty()) {
+                logger.log(Level.INFO, "No tasks added.");
+            } else {
+                logger.log(Level.INFO, "List of all tasks:");
+                taskManager.getTasks().forEach(System.out::println);
+            }
+
         }
+    }
+
+    private static void handleUpdate(TaskManager taskManager, String[] args) {
+        if (args.length < 3) {
+            logger.log(Level.INFO, "Usage: java TaskCLI update <id> <new_description>");
+            return;
+        }
+
+        int id;
+        try {
+            id = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            logger.log(Level.WARNING, "Invalid task ID: {0}. The task ID must be a valid integer.", args[1]);
+            return;
+        }
+        String newDescription = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+        boolean success = taskManager.updateTask(id, newDescription);
+        if (success) {
+            logger.log(Level.INFO, "Task with ID \"{0}\" updated.", id);
+        } else {
+            logger.log(Level.INFO, "Task with ID \"{0}\" not found.", id);
+        }
+
     }
 }

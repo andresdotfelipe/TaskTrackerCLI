@@ -25,7 +25,6 @@ public class Task {
 
     public void setDescription(String description) {
         this.description = description;
-        this.updatedAt = LocalDateTime.now();
     }
 
     public String getStatus() {
@@ -34,7 +33,6 @@ public class Task {
 
     public void setStatus(String status) {
         this.status = status;
-        this.updatedAt = LocalDateTime.now();
     }
 
     public LocalDateTime getCreatedAt() {
