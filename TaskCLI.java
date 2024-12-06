@@ -75,14 +75,14 @@ public class TaskCLI {
                 logger.log(Level.INFO, "No tasks with {0} status.", status);
             } else {
                 logger.log(Level.INFO, "List of tasks with {0} status:", status);
-                tasksByStatus.forEach(System.out::println);
+                tasksByStatus.forEach(task -> System.out.println(taskManager.formatTask(task)));
             }
         } else {
             if (taskManager.getTasks().isEmpty()) {
                 logger.log(Level.INFO, "No tasks added.");
             } else {
                 logger.log(Level.INFO, "List of all tasks:");
-                taskManager.getTasks().forEach(System.out::println);
+                taskManager.getTasks().forEach(task -> System.out.println(taskManager.formatTask(task)));
             }
 
         }

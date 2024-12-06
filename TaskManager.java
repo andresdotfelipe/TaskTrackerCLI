@@ -1,9 +1,7 @@
 import java.io.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -65,7 +63,7 @@ public class TaskManager {
                 } else if (line.startsWith("}")) {
                     tasks.add(currentTask);
                 } else if (currentTask != null && !line.startsWith("]")) {
-                    String[] parts = line.replace("\"", "").split(":");
+                    String[] parts = line.replace("\"", "").split(": ");
                     String key = parts[0].trim();
                     String value = parts[1].trim().replace(",", "");
                     if (key.equals("id")) {
@@ -80,17 +78,6 @@ public class TaskManager {
         }
     }
 
-    public int generateTaskId() {
-        if (tasks.isEmpty()) {
-            return 1;
-        }
-        return (int) tasks.getLast().get("id") + 1;
-    }
-
-    public List<Map<String, Object>> getTasks() {
-        return new ArrayList<>(tasks);
-    }
-
     public boolean updateTask(int id, String newDescription) {
         Map<String, Object> taskToFind = findTaskById(id);
         if (taskToFind == null) {
@@ -102,11 +89,30 @@ public class TaskManager {
         return Boolean.TRUE;
     }
 
+    public int generateTaskId() {
+        if (tasks.isEmpty()) {
+            return 1;
+        }
+        return (int) tasks.getLast().get("id") + 1;
+    }
+
+    public List<Map<String, Object>> getTasks() {
+        return new ArrayList<>(tasks);
+    }
+
     private Map<String, Object> findTaskById(int id) {
         return tasks
                 .stream()
                 .filter(task -> id == (int) task.get("id"))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public String formatTask(Map<String, Object> task) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formattedCreatedAtDate = LocalDateTime.parse(task.get("createdAt").toString()).format(formatter);
+        String formattedUpdatedAtDate = LocalDateTime.parse(task.get("updatedAt").toString()).format(formatter);
+        return String.format("ID: %s, Description: %s, Status: %s, Created At: %s, Updated At: %s",
+                task.get("id"), task.get("description"), task.get("status"), formattedCreatedAtDate, formattedUpdatedAtDate);
     }
 }
