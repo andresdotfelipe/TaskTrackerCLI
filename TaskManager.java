@@ -115,4 +115,8 @@ public class TaskManager {
         return String.format("ID: %s, Description: %s, Status: %s, Created At: %s, Updated At: %s",
                 task.get("id"), task.get("description"), task.get("status"), formattedCreatedAtDate, formattedUpdatedAtDate);
     }
+
+    public boolean isDescriptionEmpty(String description) {
+        return description == null || description.trim().isEmpty();
+    }
 }

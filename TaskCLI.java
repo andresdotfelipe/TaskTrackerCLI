@@ -49,7 +49,10 @@ public class TaskCLI {
 
         // Combine all arguments after "add" into a single description
         String description = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-
+        if (taskManager.isDescriptionEmpty(description)) {
+            logger.log(Level.SEVERE, "Task description cannot be empty or consist only of whitespace.");
+            return;
+        }
         Task task = new Task(taskManager.generateTaskId(), description);
         taskManager.addTask(task);
         logger.log(Level.INFO, "Task added successfully (ID: {0})", task.getId());
@@ -84,7 +87,6 @@ public class TaskCLI {
                 logger.log(Level.INFO, "List of all tasks:");
                 taskManager.getTasks().forEach(task -> System.out.println(taskManager.formatTask(task)));
             }
-
         }
     }
 
@@ -98,16 +100,25 @@ public class TaskCLI {
         try {
             id = Integer.parseInt(args[1]);
         } catch (NumberFormatException e) {
-            logger.log(Level.WARNING, "Invalid task ID: {0}. The task ID must be a valid integer.", args[1]);
+            logger.log(Level.SEVERE, "Invalid task ID: {0}. The task ID must be a valid integer.", args[1]);
             return;
         }
+
         String newDescription = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
-        boolean success = taskManager.updateTask(id, newDescription);
-        if (success) {
-            logger.log(Level.INFO, "Task with ID \"{0}\" updated.", id);
-        } else {
-            logger.log(Level.INFO, "Task with ID \"{0}\" not found.", id);
+        if (taskManager.isDescriptionEmpty(newDescription)) {
+            logger.log(Level.SEVERE, "Task description cannot be empty or consist only of whitespace.");
+            return;
         }
 
+        try {
+            boolean success = taskManager.updateTask(id, newDescription);
+            if (success) {
+                logger.log(Level.INFO, "Task with ID \"{0}\" updated successfully.", id);
+            } else {
+                logger.log(Level.WARNING, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "An error occurred while updating task with ID \"{0}\": {1}", new Object[]{id, e.getMessage()});
+        }
     }
 }
