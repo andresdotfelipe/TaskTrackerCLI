@@ -33,6 +33,7 @@ public class TaskCLI {
                 handleMarkInProgress(taskManager, args);
                 break;
             case "mark-done":
+                handleMarkDone(taskManager, args);
                 break;
             case "list":
                 handleList(taskManager, args);
@@ -150,6 +151,25 @@ public class TaskCLI {
         boolean success = taskManager.markTaskAsInProgress(id);
         if (success) {
             logger.log(Level.INFO, "Task with ID \"{0}\" marked as in-progress successfully.", id);
+        } else {
+            logger.log(Level.WARNING, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
+        }
+    }
+
+    private static void handleMarkDone(TaskManager taskManager, String[] args) {
+        if (args.length != 2) {
+            logger.log(Level.INFO, "Usage: java TaskCLI mark-done <id>");
+            return;
+        }
+
+        Long id = taskManager.validateTaskId(args[1]);
+        if (id == null) {
+            return;
+        }
+
+        boolean success = taskManager.markTaskAsDone(id);
+        if (success) {
+            logger.log(Level.INFO, "Task with ID \"{0}\" marked as done successfully.", id);
         } else {
             logger.log(Level.WARNING, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
         }

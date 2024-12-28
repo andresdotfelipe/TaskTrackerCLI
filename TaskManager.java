@@ -110,6 +110,17 @@ public class TaskManager {
         return true;
     }
 
+    public boolean markTaskAsDone(Long id) {
+        Map<String, Object> taskToFind = findTaskById(id);
+        if (taskToFind == null) {
+            return false;
+        }
+        taskToFind.put("status", "done");
+        taskToFind.put("updatedAt", LocalDateTime.now());
+        saveTasks();
+        return true;
+    }
+
     public Long generateTaskId() {
         if (tasks.isEmpty()) {
             return 1L;
