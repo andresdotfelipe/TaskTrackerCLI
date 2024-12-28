@@ -99,6 +99,17 @@ public class TaskManager {
         return true;
     }
 
+    public boolean markTaskAsInProgress(Long id) {
+        Map<String, Object> taskToFind = findTaskById(id);
+        if (taskToFind == null) {
+            return false;
+        }
+        taskToFind.put("status", "in-progress");
+        taskToFind.put("updatedAt", LocalDateTime.now());
+        saveTasks();
+        return true;
+    }
+
     public Long generateTaskId() {
         if (tasks.isEmpty()) {
             return 1L;

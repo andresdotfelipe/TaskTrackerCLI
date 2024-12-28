@@ -30,6 +30,7 @@ public class TaskCLI {
                 handleDelete(taskManager, args);
                 break;
             case "mark-in-progress":
+                handleMarkInProgress(taskManager, args);
                 break;
             case "mark-done":
                 break;
@@ -108,15 +109,11 @@ public class TaskCLI {
             return;
         }
 
-        try {
-            boolean success = taskManager.updateTask(id, newDescription);
-            if (success) {
-                logger.log(Level.INFO, "Task with ID \"{0}\" updated successfully.", id);
-            } else {
-                logger.log(Level.WARNING, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
-            }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "An error occurred while updating task with ID \"{0}\": {1}", new Object[]{id, e.getMessage()});
+        boolean success = taskManager.updateTask(id, newDescription);
+        if (success) {
+            logger.log(Level.INFO, "Task with ID \"{0}\" updated successfully.", id);
+        } else {
+            logger.log(Level.WARNING, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
         }
     }
 
@@ -130,15 +127,31 @@ public class TaskCLI {
         if (id == null) {
             return;
         }
-        try {
-            boolean success = taskManager.deleteTask(id);
-            if (success) {
-                logger.log(Level.INFO, "Task with ID \"{0}\" deleted successfully.", id);
-            } else {
-                logger.log(Level.INFO, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
-            }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "An error occurred while deleting task with ID \"{0}\": {1}", new Object[]{id, e.getMessage()});
+
+        boolean success = taskManager.deleteTask(id);
+        if (success) {
+            logger.log(Level.INFO, "Task with ID \"{0}\" deleted successfully.", id);
+        } else {
+            logger.log(Level.INFO, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
+        }
+    }
+
+    private static void handleMarkInProgress(TaskManager taskManager, String[] args) {
+        if (args.length != 2) {
+            logger.log(Level.INFO, "Usage: java TaskCLI mark-in-progress <id>");
+            return;
+        }
+
+        Long id = taskManager.validateTaskId(args[1]);
+        if (id == null) {
+            return;
+        }
+
+        boolean success = taskManager.markTaskAsInProgress(id);
+        if (success) {
+            logger.log(Level.INFO, "Task with ID \"{0}\" marked as in-progress successfully.", id);
+        } else {
+            logger.log(Level.WARNING, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
         }
     }
 }
