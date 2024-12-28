@@ -67,7 +67,7 @@ public class TaskManager {
                     String key = parts[0].trim();
                     String value = parts[1].trim().replace(",", "");
                     if (key.equals("id")) {
-                        currentTask.put(key, Integer.parseInt(value));
+                        currentTask.put(key, Long.parseLong(value));
                     } else {
                         currentTask.put(key, value);
                     }
@@ -78,32 +78,53 @@ public class TaskManager {
         }
     }
 
-    public boolean updateTask(int id, String newDescription) {
+    public boolean updateTask(Long id, String newDescription) {
         Map<String, Object> taskToFind = findTaskById(id);
         if (taskToFind == null) {
-            return Boolean.FALSE;
+            return false;
         }
         taskToFind.put("description", newDescription);
         taskToFind.put("updatedAt", LocalDateTime.now());
         saveTasks();
-        return Boolean.TRUE;
+        return true;
     }
 
-    public int generateTaskId() {
-        if (tasks.isEmpty()) {
-            return 1;
+    public boolean deleteTask(Long id) {
+        Map<String, Object> taskToFind = findTaskById(id);
+        if (taskToFind == null) {
+            return false;
         }
-        return (int) tasks.getLast().get("id") + 1;
+        tasks.remove(taskToFind);
+        saveTasks();
+        return true;
+    }
+
+    public Long generateTaskId() {
+        if (tasks.isEmpty()) {
+            return 1L;
+        }
+        return (Long) tasks.getLast().get("id") + 1;
+    }
+
+    public Long validateTaskId(String taskId) {
+        Long id;
+        try {
+            id = Long.parseLong(taskId);
+        } catch (NumberFormatException e) {
+            logger.log(Level.SEVERE, "Invalid task ID: {0}. The task ID must be a valid integer.", taskId);
+            return null;
+        }
+        return id;
     }
 
     public List<Map<String, Object>> getTasks() {
         return new ArrayList<>(tasks);
     }
 
-    private Map<String, Object> findTaskById(int id) {
+    private Map<String, Object> findTaskById(Long id) {
         return tasks
                 .stream()
-                .filter(task -> id == (int) task.get("id"))
+                .filter(task -> id.equals(task.get("id")))
                 .findFirst()
                 .orElse(null);
     }

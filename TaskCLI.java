@@ -27,6 +27,7 @@ public class TaskCLI {
                 handleUpdate(taskManager, args);
                 break;
             case "delete":
+                handleDelete(taskManager, args);
                 break;
             case "mark-in-progress":
                 break;
@@ -36,7 +37,7 @@ public class TaskCLI {
                 handleList(taskManager, args);
                 break;
             default:
-                logger.log(Level.INFO, "Unknown command: {0}\nAvailable commands: add, list, update", command);
+                logger.log(Level.INFO, "Unknown command: {0}\nAvailable commands: add, list, update, delete", command);
                 break;
         }
     }
@@ -96,11 +97,8 @@ public class TaskCLI {
             return;
         }
 
-        int id;
-        try {
-            id = Integer.parseInt(args[1]);
-        } catch (NumberFormatException e) {
-            logger.log(Level.SEVERE, "Invalid task ID: {0}. The task ID must be a valid integer.", args[1]);
+        Long id = taskManager.validateTaskId(args[1]);
+        if (id == null) {
             return;
         }
 
@@ -119,6 +117,28 @@ public class TaskCLI {
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "An error occurred while updating task with ID \"{0}\": {1}", new Object[]{id, e.getMessage()});
+        }
+    }
+
+    private static void handleDelete(TaskManager taskManager, String[] args) {
+        if (args.length != 2) {
+            logger.log(Level.INFO, "Usage: java TaskCLI delete <id>");
+            return;
+        }
+
+        Long id = taskManager.validateTaskId(args[1]);
+        if (id == null) {
+            return;
+        }
+        try {
+            boolean success = taskManager.deleteTask(id);
+            if (success) {
+                logger.log(Level.INFO, "Task with ID \"{0}\" deleted successfully.", id);
+            } else {
+                logger.log(Level.INFO, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "An error occurred while deleting task with ID \"{0}\": {1}", new Object[]{id, e.getMessage()});
         }
     }
 }

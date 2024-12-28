@@ -1,13 +1,13 @@
 import java.time.LocalDateTime;
 
 public class Task {
-    private final int id;
+    private final Long id;
     private String description;
     private String status;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Task(int id, String description) {
+    public Task(Long id, String description) {
         this.id = id;
         this.description = description;
         this.status = "todo"; // default status
@@ -15,7 +15,7 @@ public class Task {
         this.updatedAt = this.createdAt;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
