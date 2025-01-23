@@ -1,10 +1,12 @@
+import utils.constants.DateTimeConstants;
+import utils.constants.TaskConstants;
+
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class TaskManager {
     private static final String FILE_NAME = "tasks.json";
@@ -18,11 +20,11 @@ public class TaskManager {
 
     public void addTask(Task task) {
         Map<String, Object> taskMap = new HashMap<>();
-        taskMap.put("id", task.getId());
-        taskMap.put("description", task.getDescription());
-        taskMap.put("status", task.getStatus());
-        taskMap.put("createdAt", task.getCreatedAt());
-        taskMap.put("updatedAt", task.getUpdatedAt());
+        taskMap.put(TaskConstants.KEY_ID, task.getId());
+        taskMap.put(TaskConstants.KEY_DESCRIPTION, task.getDescription());
+        taskMap.put(TaskConstants.KEY_STATUS, task.getStatus());
+        taskMap.put(TaskConstants.KEY_CREATED_AT, task.getCreatedAt());
+        taskMap.put(TaskConstants.KEY_UPDATED_AT, task.getUpdatedAt());
         tasks.add(taskMap);
         saveTasks();
     }
@@ -33,11 +35,11 @@ public class TaskManager {
             for (int i = 0; i < tasks.size(); i++) {
                 Map<String, Object> task = tasks.get(i);
                 writer.write("  {\n");
-                writer.write("    \"id\": " + task.get("id") + ",\n");
-                writer.write("    \"description\": \"" + task.get("description") + "\",\n");
-                writer.write("    \"status\": \"" + task.get("status") + "\",\n");
-                writer.write("    \"createdAt\": \"" + task.get("createdAt") + "\",\n");
-                writer.write("    \"updatedAt\": \"" + task.get("updatedAt") + "\"\n");
+                writer.write("    \"" + TaskConstants.KEY_ID + "\": " + task.get("id") + ",\n");
+                writer.write("    \"" + TaskConstants.KEY_DESCRIPTION + "\": \"" + task.get("description") + "\",\n");
+                writer.write("    \"" + TaskConstants.KEY_STATUS + "\": \"" + task.get("status") + "\",\n");
+                writer.write("    \"" + TaskConstants.KEY_CREATED_AT + "\": \"" + task.get("createdAt") + "\",\n");
+                writer.write("    \"" + TaskConstants.KEY_UPDATED_AT + "\": \"" + task.get("updatedAt") + "\"\n");
                 writer.write("  }" + (i < tasks.size() - 1 ? "," : "") + "\n");
             }
             writer.write("]");
@@ -66,7 +68,7 @@ public class TaskManager {
                     String[] parts = line.replace("\"", "").split(": ");
                     String key = parts[0].trim();
                     String value = parts[1].trim().replace(",", "");
-                    if (key.equals("id")) {
+                    if (key.equals(TaskConstants.KEY_ID)) {
                         currentTask.put(key, Long.parseLong(value));
                     } else {
                         currentTask.put(key, value);
@@ -83,8 +85,8 @@ public class TaskManager {
         if (taskToFind == null) {
             return false;
         }
-        taskToFind.put("description", newDescription);
-        taskToFind.put("updatedAt", LocalDateTime.now());
+        taskToFind.put(TaskConstants.KEY_DESCRIPTION, newDescription);
+        taskToFind.put(TaskConstants.KEY_UPDATED_AT, LocalDateTime.now());
         saveTasks();
         return true;
     }
@@ -104,8 +106,8 @@ public class TaskManager {
         if (taskToFind == null) {
             return false;
         }
-        taskToFind.put("status", "in-progress");
-        taskToFind.put("updatedAt", LocalDateTime.now());
+        taskToFind.put(TaskConstants.KEY_STATUS, TaskConstants.STATUS_IN_PROGRESS);
+        taskToFind.put(TaskConstants.KEY_UPDATED_AT, LocalDateTime.now());
         saveTasks();
         return true;
     }
@@ -115,8 +117,8 @@ public class TaskManager {
         if (taskToFind == null) {
             return false;
         }
-        taskToFind.put("status", "done");
-        taskToFind.put("updatedAt", LocalDateTime.now());
+        taskToFind.put(TaskConstants.KEY_STATUS, TaskConstants.STATUS_DONE);
+        taskToFind.put(TaskConstants.KEY_UPDATED_AT, LocalDateTime.now());
         saveTasks();
         return true;
     }
@@ -125,7 +127,7 @@ public class TaskManager {
         if (tasks.isEmpty()) {
             return 1L;
         }
-        return (Long) tasks.getLast().get("id") + 1;
+        return (Long) tasks.getLast().get(TaskConstants.KEY_ID) + 1;
     }
 
     public Long validateTaskId(String taskId) {
@@ -146,17 +148,16 @@ public class TaskManager {
     private Map<String, Object> findTaskById(Long id) {
         return tasks
                 .stream()
-                .filter(task -> id.equals(task.get("id")))
+                .filter(task -> id.equals(task.get(TaskConstants.KEY_ID)))
                 .findFirst()
                 .orElse(null);
     }
 
     public String formatTask(Map<String, Object> task) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String formattedCreatedAtDate = LocalDateTime.parse(task.get("createdAt").toString()).format(formatter);
-        String formattedUpdatedAtDate = LocalDateTime.parse(task.get("updatedAt").toString()).format(formatter);
-        return String.format("ID: %s, Description: %s, Status: %s, Created At: %s, Updated At: %s",
-                task.get("id"), task.get("description"), task.get("status"), formattedCreatedAtDate, formattedUpdatedAtDate);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DateTimeConstants.DATE_TIME_PATTERN);
+        String formattedCreatedAtDate = LocalDateTime.parse(task.get(TaskConstants.KEY_CREATED_AT).toString()).format(formatter);
+        String formattedUpdatedAtDate = LocalDateTime.parse(task.get(TaskConstants.KEY_UPDATED_AT).toString()).format(formatter);
+        return String.format(TaskConstants.TASK_DETAILS_FORMAT, task.get(TaskConstants.KEY_ID), task.get(TaskConstants.KEY_DESCRIPTION), task.get(TaskConstants.KEY_STATUS), formattedCreatedAtDate, formattedUpdatedAtDate);
     }
 
     public boolean isDescriptionEmpty(String description) {

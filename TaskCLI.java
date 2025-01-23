@@ -1,4 +1,5 @@
 import config.LoggerConfigurator;
+import utils.constants.TaskConstants;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +40,9 @@ public class TaskCLI {
                 handleList(taskManager, args);
                 break;
             default:
-                logger.log(Level.INFO, "Unknown command: {0}\nAvailable commands: add, list, update, delete", command);
+                logger.log(Level.INFO,
+                        "Unknown command: {0}\nAvailable commands: add, list, update, delete, mark-in-progress, mark-done",
+                        command);
                 break;
         }
     }
@@ -69,13 +72,14 @@ public class TaskCLI {
 
         if (args.length == 2) {
             String status = args[1];
-            if (!status.equals("done") && !status.equals("todo") && !status.equals("in-progress")) {
-                logger.log(Level.INFO, "Invalid task status: {0}\nUsage: java TaskCLI list [done|todo|in-progress]", status);
+            if (!status.equals(TaskConstants.STATUS_DONE) && !status.equals(TaskConstants.STATUS_TODO) && !status.equals(TaskConstants.STATUS_IN_PROGRESS)) {
+                logger.log(Level.INFO, "Invalid task status: {0}\nUsage: java TaskCLI list [done|todo|in-progress]",
+                        status);
                 return;
             }
             List<Map<String, Object>> tasksByStatus = taskManager.getTasks()
                     .stream()
-                    .filter(task -> status.equals(task.get("status")))
+                    .filter(task -> status.equals(task.get(TaskConstants.KEY_STATUS)))
                     .toList();
             if (tasksByStatus.isEmpty()) {
                 logger.log(Level.INFO, "No tasks with {0} status.", status);
