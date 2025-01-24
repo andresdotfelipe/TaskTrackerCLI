@@ -18,7 +18,7 @@ public class TaskManager {
         loadTasks(); // Load tasks from file at startup
     }
 
-    public void addTask(Task task) {
+    public boolean addTask(Task task) {
         Map<String, Object> taskMap = new HashMap<>();
         taskMap.put(TaskConstants.KEY_ID, task.getId());
         taskMap.put(TaskConstants.KEY_DESCRIPTION, task.getDescription());
@@ -26,10 +26,14 @@ public class TaskManager {
         taskMap.put(TaskConstants.KEY_CREATED_AT, task.getCreatedAt());
         taskMap.put(TaskConstants.KEY_UPDATED_AT, task.getUpdatedAt());
         tasks.add(taskMap);
-        saveTasks();
+        if (!saveTasks()) {
+            logger.log(Level.SEVERE, "Failed to add task to file.");
+            return false;
+        }
+        return true;
     }
 
-    private void saveTasks() {
+    private boolean saveTasks() {
         try (FileWriter writer = new FileWriter(FILE_NAME)) {
             writer.write("[\n");
             for (int i = 0; i < tasks.size(); i++) {
@@ -43,8 +47,10 @@ public class TaskManager {
                 writer.write("  }" + (i < tasks.size() - 1 ? "," : "") + "\n");
             }
             writer.write("]");
+            return true;
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Error while saving tasks.", e);
+            logger.log(Level.SEVERE, "Error while saving tasks to file.", e);
+            return false;
         }
     }
 
@@ -83,43 +89,59 @@ public class TaskManager {
     public boolean updateTask(Long id, String newDescription) {
         Map<String, Object> taskToFind = findTaskById(id);
         if (taskToFind == null) {
+            logger.log(Level.WARNING, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
             return false;
         }
         taskToFind.put(TaskConstants.KEY_DESCRIPTION, newDescription);
         taskToFind.put(TaskConstants.KEY_UPDATED_AT, LocalDateTime.now());
-        saveTasks();
+        if (!saveTasks()) {
+            logger.log(Level.SEVERE, "Failed to update task description in file.");
+            return false;
+        }
         return true;
     }
 
     public boolean deleteTask(Long id) {
         Map<String, Object> taskToFind = findTaskById(id);
         if (taskToFind == null) {
+            logger.log(Level.WARNING, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
             return false;
         }
         tasks.remove(taskToFind);
-        saveTasks();
+        if (!saveTasks()) {
+            logger.log(Level.SEVERE, "Failed to delete task in file.");
+            return false;
+        }
         return true;
     }
 
     public boolean markTaskAsInProgress(Long id) {
         Map<String, Object> taskToFind = findTaskById(id);
         if (taskToFind == null) {
+            logger.log(Level.WARNING, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
             return false;
         }
         taskToFind.put(TaskConstants.KEY_STATUS, TaskConstants.STATUS_IN_PROGRESS);
         taskToFind.put(TaskConstants.KEY_UPDATED_AT, LocalDateTime.now());
-        saveTasks();
+        if (!saveTasks()) {
+            logger.log(Level.SEVERE, "Failed to mark task as in-progress in file.");
+            return false;
+        }
         return true;
     }
 
     public boolean markTaskAsDone(Long id) {
         Map<String, Object> taskToFind = findTaskById(id);
         if (taskToFind == null) {
+            logger.log(Level.WARNING, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
             return false;
         }
         taskToFind.put(TaskConstants.KEY_STATUS, TaskConstants.STATUS_DONE);
         taskToFind.put(TaskConstants.KEY_UPDATED_AT, LocalDateTime.now());
-        saveTasks();
+        if (!saveTasks()) {
+            logger.log(Level.SEVERE, "Failed to mark task as done in file.");
+            return false;
+        }
         return true;
     }
 

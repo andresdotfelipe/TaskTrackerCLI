@@ -60,8 +60,12 @@ public class TaskCLI {
             return;
         }
         Task task = new Task(taskManager.generateTaskId(), description);
-        taskManager.addTask(task);
-        logger.log(Level.INFO, "Task added successfully (ID: {0})", task.getId());
+        boolean success = taskManager.addTask(task);
+        if (success) {
+            logger.log(Level.INFO, "Task added successfully (ID: {0}).", task.getId());
+        } else {
+            logger.log(Level.INFO, "Failed to add task.");
+        }
     }
 
     private static void handleList(TaskManager taskManager, String[] args) {
@@ -118,7 +122,7 @@ public class TaskCLI {
         if (success) {
             logger.log(Level.INFO, "Task with ID \"{0}\" updated successfully.", id);
         } else {
-            logger.log(Level.WARNING, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
+            logger.log(Level.INFO, "Failed to update task description.");
         }
     }
 
@@ -137,7 +141,7 @@ public class TaskCLI {
         if (success) {
             logger.log(Level.INFO, "Task with ID \"{0}\" deleted successfully.", id);
         } else {
-            logger.log(Level.INFO, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
+            logger.log(Level.INFO, "Failed to delete task.");
         }
     }
 
@@ -156,7 +160,7 @@ public class TaskCLI {
         if (success) {
             logger.log(Level.INFO, "Task with ID \"{0}\" marked as in-progress successfully.", id);
         } else {
-            logger.log(Level.WARNING, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
+            logger.log(Level.INFO, "Failed to mark task as in-progress.");
         }
     }
 
@@ -175,7 +179,7 @@ public class TaskCLI {
         if (success) {
             logger.log(Level.INFO, "Task with ID \"{0}\" marked as done successfully.", id);
         } else {
-            logger.log(Level.WARNING, "Task with ID \"{0}\" not found. Please ensure the task ID is correct.", id);
+            logger.log(Level.INFO, "Failed to mark task as done.");
         }
     }
 }
